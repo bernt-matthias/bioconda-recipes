@@ -1,5 +1,5 @@
-{% set version="2.3c" %}
-{% set hash="da76f686ce05df6887e792f6ee9836be7199804a3de749866c2ddc5c2f39982e" %}
+{% set version="2.3d" %}
+{% set hash="970e2aef0c1e92ee5a17dfef69d4c8cf864657c0a4bf0b6b67b15ccc13a24a59" %}
 
 package:
   name: stacks
