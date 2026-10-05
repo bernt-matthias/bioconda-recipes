@@ -10,6 +10,7 @@ source:
 
 build:
   number: 1
+  skip: true  # [osx]
   run_exports:
     - {{ pin_subpackage('savont', max_pin="x.x") }}
 
