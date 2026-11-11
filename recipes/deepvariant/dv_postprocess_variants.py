@@ -6,6 +6,7 @@ BINARY_DIR="/opt/anaconda1anaconda2anaconda3/BINARYSUB"
 
 import argparse
 import os
+import shlex
 import subprocess
 import sys
 
@@ -21,9 +22,12 @@ class DVHelp(argparse._HelpAction):
         lib_path = os.path.join(os.path.dirname(conda_path), "lib")
         py_exe = sys.executable
         cmd = ("export LD_LIBRARY_PATH={lib_path}:\"$LD_LIBRARY_PATH\" && "
-               "{py_exe} {bin_dir}/postprocess_variants.zip --help")
+               "{py_exe} {bin_dir}/postprocess_variants.zip --help").format(
+                   lib_path=shlex.quote(lib_path),
+                   py_exe=shlex.quote(py_exe),
+                   bin_dir=shlex.quote(bin_dir))
         try:
-            subprocess.check_output(cmd.format(**locals()), shell=True)
+            subprocess.check_output(cmd, shell=True)
         except subprocess.CalledProcessError as e:
             print(e.stdout.decode('UTF-8'))
         print()
@@ -45,13 +49,25 @@ def main():
     conda_path = os.path.dirname(os.path.realpath(sys.executable))
     lib_path = os.path.join(os.path.dirname(conda_path), "lib")
     py_exe = sys.executable
-    gvcf = ("--nonvariant_site_tfrecord_path {args.gvcf_infile} "
-            "--gvcf_outfile {args.gvcf_outfile} ").format(**locals()) if args.gvcf_infile and args.gvcf_outfile else ""
+    # The command is executed by a shell, so every value that comes from the
+    # command line has to be quoted: an argument such as
+    # --ref 'x; rm -rf ~' would otherwise start a second command.
+    gvcf = ("--nonvariant_site_tfrecord_path {gvcf_infile} "
+            "--gvcf_outfile {gvcf_outfile} ").format(
+                gvcf_infile=shlex.quote(args.gvcf_infile),
+                gvcf_outfile=shlex.quote(args.gvcf_outfile)) if args.gvcf_infile and args.gvcf_outfile else ""
     cmd = ("export LD_LIBRARY_PATH={lib_path}:\"$LD_LIBRARY_PATH\" && "
            "{py_exe} {bin_dir}/postprocess_variants.zip "
            "{gvcf} "
-           "--ref {args.ref} --infile {args.infile} --outfile {args.outfile}")
-    sys.exit(subprocess.call(cmd.format(**locals()), shell=True))
+           "--ref {ref} --infile {infile} --outfile {outfile}").format(
+               lib_path=shlex.quote(lib_path),
+               py_exe=shlex.quote(py_exe),
+               bin_dir=shlex.quote(bin_dir),
+               gvcf=gvcf,
+               ref=shlex.quote(args.ref),
+               infile=shlex.quote(args.infile),
+               outfile=shlex.quote(args.outfile))
+    sys.exit(subprocess.call(cmd, shell=True))
 
 if __name__ == '__main__':
     main()

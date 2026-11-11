@@ -10,6 +10,7 @@ MODEL_DIRS= {"wgs": "/opt/anaconda1anaconda2anaconda3/WGSMODELSUB",
 
 import argparse
 import os
+import shlex
 import subprocess
 import sys
 
@@ -43,10 +44,20 @@ def main():
     bin_dir = real_dirname(BINARY_DIR)
     model_dir = real_dirname(MODEL_DIRS[args.model])
     py_exe = sys.executable
+    # The command is executed by a shell, so every value that comes from the
+    # command line has to be quoted: an argument such as
+    # --outfile 'x; rm -rf ~' would otherwise start a second command.
     cmd = ("{py_exe} {bin_dir}/call_variants.zip "
-           "--outfile {args.outfile} --examples {args.examples}/{args.sample}.tfrecord@{args.cores}.gz "
-           "--checkpoint {model_dir}/model.ckpt")
-    sys.exit(subprocess.call(cmd.format(**locals()), shell=True))
+           "--outfile {outfile} --examples {examples}/{sample}.tfrecord@{cores}.gz "
+           "--checkpoint {model_dir}/model.ckpt").format(
+               py_exe=shlex.quote(py_exe),
+               bin_dir=shlex.quote(bin_dir),
+               model_dir=shlex.quote(model_dir),
+               outfile=shlex.quote(args.outfile),
+               examples=shlex.quote(args.examples),
+               sample=shlex.quote(args.sample),
+               cores=shlex.quote(str(args.cores)))
+    sys.exit(subprocess.call(cmd, shell=True))
 
 if __name__ == '__main__':
     main()
