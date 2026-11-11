@@ -21,6 +21,8 @@ if not args.fname:
     sys.exit()
 
 fname = os.path.abspath(args.fname)
-rest = " ".join(unknownargs)
-cmd = "./{} -f {} {}".format(weeder_exe, fname, rest)
-sys.exit(sp.call(cmd, shell=True, cwd=weeder_dir))
+# Pass the arguments as a list: joining them into a command string and running
+# that with shell=True executed shell metacharacters inside file names and
+# options, and split paths that contain spaces into several arguments.
+cmd = [os.path.join(".", weeder_exe), "-f", fname] + list(unknownargs)
+sys.exit(sp.call(cmd, cwd=weeder_dir))
