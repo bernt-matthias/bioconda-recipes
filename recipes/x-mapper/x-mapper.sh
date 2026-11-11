@@ -24,42 +24,36 @@ fi
 
 # extract memory and system property Java arguments from the list of provided arguments
 # http://java.dzone.com/articles/better-java-shell-script
-default_jvm_mem_opts="-Xms512m -Xmx10g"
-jvm_mem_opts=""
-jvm_prop_opts=""
-pass_args=""
+default_jvm_mem_opts=(-Xms512m -Xmx10g)
+jvm_mem_opts=()
+jvm_prop_opts=()
+pass_args=()
 for arg in "$@"; do
     case "$arg" in
         '-D'*)
-            jvm_prop_opts="$jvm_prop_opts $arg"
+            jvm_prop_opts+=("$arg")
             ;;
         '-XX'*)
-            jvm_prop_opts="$jvm_prop_opts $arg"
+            jvm_prop_opts+=("$arg")
             ;;
          '-Xm'*)
-            jvm_mem_opts="$jvm_mem_opts $arg"
+            jvm_mem_opts+=("$arg")
             ;;
          *)
-            # join other arguments with spaces
-	    if [[ "${pass_args}" == "" ]]
-            then
-                pass_args="$arg"
-	    else
-                pass_args="$pass_args $arg"
-            fi
+            pass_args+=("$arg")
             ;;
     esac
 done
 
-if [ "$jvm_mem_opts" == "" ]; then
-    jvm_mem_opts="$default_jvm_mem_opts"
+if [ "${#jvm_mem_opts[@]}" -eq 0 ]; then
+    jvm_mem_opts=("${default_jvm_mem_opts[@]}")
 fi
 
 # runs a command, and if it fails, outputs the failed command
 function runExplain() {
   commandToRun="$1"
   shift
-  if "$commandToRun" $*; then
+  if "$commandToRun" "$@"; then
     return
   else
     echo >&2
@@ -68,4 +62,4 @@ function runExplain() {
   fi
 }
 
-runExplain "$java" $jvm_mem_opts $jvm_prop_opts -jar "$JAR_DIR/x-mapper.jar" $pass_args
+runExplain "$java" "${jvm_mem_opts[@]}" "${jvm_prop_opts[@]}" -jar "$JAR_DIR/x-mapper.jar" "${pass_args[@]}"
