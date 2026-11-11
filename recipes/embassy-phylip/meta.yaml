@@ -3,7 +3,7 @@ package:
   version: "3.69.660"
 
 build:
-  number: 0
+  number: 1
   run_exports:
     - {{ pin_subpackage("embassy-phylip", max_pin="x") }}
 
