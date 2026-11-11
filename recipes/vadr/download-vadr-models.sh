@@ -35,7 +35,7 @@ fi
 CURRENT_DIR=$(pwd)
 mkdir -p ${VADRMODELDIR}/tmp
 cd $VADRMODELDIR/tmp
-for model in $*; do
+for model in "$@"; do
     MODEL_FOUND="0"
     for vadr_model in $AVAILABLE_MODELS; do
         if [[ "${model}" == "${vadr_model}" ]]; then
